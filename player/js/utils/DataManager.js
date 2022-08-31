@@ -24,7 +24,7 @@ const dataManager = (function () {
   };
   function createWorker(fn) {
     if (window.Worker && window.Blob && getWebWorker()) {
-      var blob = new Blob(['var _workerSelf = self; self.onmessage = ', fn.toString()], { type: 'text/javascript' });
+      var blob = new Blob(['var _workerSelf = self; self.onmessage = (', fn.toString(), ').bind(_workerSelf)'], { type: 'text/javascript' });
       // var blob = new Blob(['self.onmessage = ', fn.toString()], { type: 'text/javascript' });
       var url = URL.createObjectURL(blob);
       return new Worker(url);
@@ -36,6 +36,7 @@ const dataManager = (function () {
   function setupWorker() {
     if (!workerInstance) {
       workerInstance = createWorker(function workerStart(e) {
+        if (typeof _workerSelf === 'undefined') _workerSelf = this;
         function dataFunctionManager() {
           function completeLayers(layers, comps) {
             var layerData;
